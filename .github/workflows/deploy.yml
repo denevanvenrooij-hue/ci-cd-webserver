@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       DEPLOYMENT_NAME: ci-cd-webserver
       ENVIRONMENT: python3-12
@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ubiops-cli
           pip install pip-system-certs
+          pip install ubiops-cli
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Build and save Docker image
