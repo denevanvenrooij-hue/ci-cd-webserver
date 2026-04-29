@@ -1,0 +1,59 @@
+name: Deploy a Service
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_NAME: ci-cd-webserver
+      ENVIRONMENT: python3-12
+      DIR_PATH: ./deployment_package
+      UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
+      CONFIG_DIR: ./config
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ubiops-cli
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Create a Docker file
+      
+      - name: Authenticate with UbiOps
+        run: ubiops signin --token -p "Token ${{ secrets.UBIOPS_TOKEN }} --api "https://api.intermax.ubiops.com/v2.1"
+      
+      - name: Set version name
+        id: version
+        run: |
+          VERSION_NAME="v-${GITHUB_SHA:0:7}"
+          echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
+      
+      - name: Create and test a Deployment
+        run: |
+          ubiops deployments get ${DEPLOYMENT_NAME} || ubiops deployments create -f ${CONFIG_DIR}/deployment.yaml
+          ubiops environment_variables create -d ${DEPLOYMENT_NAME} -f ${CONFIG_DIR}/environment_variables.yaml --overwrite
+          ubiops deployments deploy -f ${CONFIG_DIR}/deployment_version.yaml -dir ${DIR_PATH} \
+            --version_name ${VERSION_NAME} --overwrite -y \
+            --labels git-user:${{ github.actor }},git-commit:${GITHUB_SHA}
+          chmod +x tests/test_deployment_health.sh
+          ./tests/test_deployment_health.sh ${DEPLOYMENT_NAME} ${VERSION_NAME}
+      
+      - name: Create and test a Service
+        run : |
+          ubiops deployments update ${DEPLOYMENT_NAME} --default_version ${VERSION_NAME}
+          ubiops services create -f ${CONFIG_DIR}/service.yaml --overwrite --format yaml
+          SERVICE_URL=$(ubiops services get ${DEPLOYMENT_NAME} --format json | jq -r '.endpoint')
+          echo 'Service URL:' ${SERVICE_URL}
+          chmod +x tests/test_service_endpoint.sh
+          TOKEN_CLEAN=$(echo "${UBIOPS_TOKEN}" | sed 's/^Token //')
+          ./tests/test_service_endpoint.sh ${SERVICE_URL} ${TOKEN_CLEAN}

@@ -1,0 +1,6 @@
+deployment_name: ci-cd-webserver
+version_description: Deployed via CI/CD
+environment: python3-12
+instance_type: 1024mb
+has_request_method: false
+minimum_instances: 1

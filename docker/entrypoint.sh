@@ -1,0 +1,37 @@
+#!/bin/sh
+set -e
+
+WEBROOT="/usr/share/nginx/html"
+CLONE_DIR="/tmp/site-repo"
+
+# --- Validation ---
+if [ -z "${GITHUB_REPO}" ]; then
+  echo "ERROR: GITHUB_REPO is not set."
+  echo "  Set it as a build arg (docker build --build-arg GITHUB_REPO=...) or at runtime (-e GITHUB_REPO=...)."
+  exit 1
+fi
+
+if [ -z "${GITHUB_TOKEN}" ]; then
+  echo "ERROR: GITHUB_TOKEN is not set. A personal access token is required."
+  exit 1
+fi
+
+BRANCH="${GITHUB_BRANCH:-main}"
+
+# Inject token into the HTTPS URL
+# Supports:  https://github.com/org/repo.git
+CLONE_URL=$(echo "${GITHUB_REPO}" | sed "s|https://|https://${GITHUB_TOKEN}@|")
+
+echo "Cloning ${GITHUB_REPO} (branch: ${BRANCH})..."
+rm -rf "${CLONE_DIR}"
+git clone --depth=1 --branch "${BRANCH}" "${CLONE_URL}" "${CLONE_DIR}"
+
+echo "Deploying site to ${WEBROOT}..."
+cp -rf "${CLONE_DIR}/." "${WEBROOT}/"
+rm -rf "${WEBROOT}/.git" 2>/dev/null || true
+
+# Clean up clone dir
+rm -rf "${CLONE_DIR}"
+
+echo "Site deployed. Starting nginx..."
+exec nginx -g "daemon off;"

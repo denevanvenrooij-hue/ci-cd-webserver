@@ -1,0 +1,7 @@
+service_name: ci-cd-webserver
+service_description:
+service_deployment: ci-cd-webserver
+port: 4001
+authentication_required: false
+request_logging_excluded_paths: "(health|status)$"
+rate_limit_token: 300
