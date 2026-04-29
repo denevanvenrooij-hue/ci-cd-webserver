@@ -14,6 +14,7 @@ jobs:
       DIR_PATH: ./docker-environment
       UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
       CONFIG_DIR: ./config
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
     steps:
       - uses: actions/checkout@v3
