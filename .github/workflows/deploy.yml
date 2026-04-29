@@ -58,7 +58,7 @@ jobs:
         run: |
           ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
           ubiops environments deploy ${ENVIRONMENT_NAME} -a ./${DIR_PATH}/environment.tar \
-          -base-env ${ENVIRONMENT} -requests false --overwrite true -y true
+          -base-env ${ENVIRONMENT} -requests false --overwrite true
       
       - name: Create and test a Deployment
         run: |
