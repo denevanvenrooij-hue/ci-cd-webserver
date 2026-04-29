@@ -37,7 +37,7 @@ jobs:
           docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/environment.tar
       
       - name: Authenticate with UbiOps
-        run: ubiops signin --token -p "Token ${{ secrets.UBIOPS_TOKEN }}" --api "https://api.intermax.ubiops.com/v2.1"
+        run: ubiops signin --token -p "${{ secrets.UBIOPS_TOKEN }}" --api "https://api.intermax.ubiops.com/v2.1"
       
       - name: Set version name
         id: version
