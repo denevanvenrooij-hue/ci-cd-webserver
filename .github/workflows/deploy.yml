@@ -10,7 +10,8 @@ jobs:
     env:
       DEPLOYMENT_NAME: ci-cd-webserver
       ENVIRONMENT: python3-12
-      DIR_PATH: ./deployment_package
+      ENVIRONMENT_NAME: ci-cd-webserver
+      DIR_PATH: ./docker-environment
       UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
       CONFIG_DIR: ./config
     steps:
@@ -27,7 +28,12 @@ jobs:
           pip install ubiops-cli
           sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Create a Docker file
+      - name: Build and save Docker image
+        run: |
+          docker build \
+            --build-arg GITHUB_REPO=${{ github.repository }} \
+            -t ci-cd-webserver:${{ github.sha }} ./docker-files/
+          docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/environment.tar
       
       - name: Authenticate with UbiOps
         run: ubiops signin --token -p "Token ${{ secrets.UBIOPS_TOKEN }} --api "https://api.intermax.ubiops.com/v2.1"
@@ -37,6 +43,12 @@ jobs:
         run: |
           VERSION_NAME="v-${GITHUB_SHA:0:7}"
           echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
+
+      - name: Create and deploy an environment
+        run: |
+          ubiops environment get ${ENVIRONEMT_NAME} || ubiops environment create -f ${CONFIG_DIR}/environment.yaml
+          ubiops environment deploy ${ENVIRONEMT_NAME} -a ./docker-environment/environment.tar \
+          -base-env ${ENVIRONMENT} -requests false --overwrite true -y -pb
       
       - name: Create and test a Deployment
         run: |
