@@ -56,8 +56,8 @@ jobs:
 
       - name: Create and deploy an environment
         run: |
-          ubiops environments get ${ENVIRONEMT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
-          ubiops environments deploy ${ENVIRONEMT_NAME} -a ./docker-environment/environment.tar \
+          ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
+          ubiops environments deploy ${ENVIRONMENT_NAME} -a ./docker-environment/environment.tar \
           -base-env ${ENVIRONMENT} -requests false --overwrite true -y -pb
       
       - name: Create and test a Deployment
