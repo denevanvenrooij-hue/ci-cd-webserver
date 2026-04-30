@@ -3,4 +3,4 @@ deployment_description: "Static webserver deployment"
 deployment_labels:
   created-by: ci-cd
 default_version: "v1"
-has_request_method: false
+deployment_supports_request_format: false
