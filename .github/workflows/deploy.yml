@@ -10,7 +10,7 @@ jobs:
     env:
       DEPLOYMENT_NAME: ci-cd-webserver
       ENVIRONMENT: python3-12
-      ENVIRONMENT_NAME: ci-cd-webserver
+      ENVIRONMENT_NAME: ci-cd-webservers
       DIR_PATH: ./docker-environment
       UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
       CONFIG_DIR: ./config
@@ -56,9 +56,8 @@ jobs:
 
       - name: Create and deploy an environment
         run: |
-          ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
-          ubiops environments deploy ${ENVIRONMENT_NAME} -a ./${DIR_PATH}/environment.tar \
-          -base-env ${ENVIRONMENT} -requests false --overwrite
+          ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml --supports_request_format false
+          ubiops environments deploy ${ENVIRONMENT_NAME} -a ./${DIR_PATH}/environment.tar -base-env ${ENVIRONMENT}
       
       - name: Create and test a Deployment
         run: |
