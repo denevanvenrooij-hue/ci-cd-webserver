@@ -4,7 +4,7 @@ RUN apk add --no-cache git
 
 # Default repo URL baked in at build time — override at runtime via GITHUB_REPO env var
 ARG GITHUB_REPO
-ENV GITHUB_REPO=${GITHUB_REPO}
+ENV GITHUB_REPO="https://github/denevanvenrooij-hue/ci-cd-webserver.git/"
 
 ENV GITHUB_BRANCH="main"
 
@@ -26,6 +26,6 @@ RUN mkdir -p /var/cache/nginx/client_temp \
     chmod -R 777 /var/cache/nginx && \
     chmod -R 777 /var/run
 
-EXPOSE 8080
+EXPOSE 4001
 
 ENTRYPOINT ["/entrypoint.sh"]
