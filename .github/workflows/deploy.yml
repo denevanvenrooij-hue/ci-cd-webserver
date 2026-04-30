@@ -48,7 +48,7 @@ jobs:
       - name: Authenticate with UbiOps
         run: ubiops signin --token -p "${{ secrets.UBIOPS_TOKEN }}" --api "https://api.intermax.ubiops.com/v2.1"
       
-      - name: Set version name
+      - name: Set version name 
         id: version
         run: |
           VERSION_NAME="v-${GITHUB_SHA:0:7}"
