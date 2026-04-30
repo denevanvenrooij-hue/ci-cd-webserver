@@ -54,7 +54,7 @@ jobs:
           VERSION_NAME="v-${GITHUB_SHA:0:7}"
           echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
 
-      - name: Create and deploy an environment
+      - name: Create and deploy an Environment
         run: |
           ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
           ubiops environments deploy ${ENVIRONMENT_NAME} -a ./${DIR_PATH}/environment.tar \
