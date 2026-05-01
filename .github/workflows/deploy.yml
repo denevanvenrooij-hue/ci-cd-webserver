@@ -1,4 +1,4 @@
-name: Deploy a Service
+name: Deploy a Service with BYODocker
 
 on:
   push:
@@ -30,17 +30,17 @@ jobs:
 
       - name: Connect to VPN
         run: |
-          sudo apt-get install -y openvpn
           echo "${{ secrets.VPN }}" > vpn.ovpn
           sudo apt-get install -y openvpn
           sudo openvpn --config vpn.ovpn --daemon
 
       - name: Build and save Docker image
         run: |
+          mkdir -p ${DIR_PATH}
           docker build \
             --build-arg GITHUB_REPO=${{ github.repository }} \
             -t ci-cd-webserver:${{ github.sha }} ./docker-files/
-          docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/environment.tar
+          docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/static-webserver-env.tar
       
       - name: Authenticate with UbiOps
         run: ubiops signin --token -p "${{ secrets.UBIOPS_TOKEN }}" --api "https://api.intermax.ubiops.com/v2.1"
@@ -54,7 +54,7 @@ jobs:
       - name: Create and deploy an environment
         run: |
           ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml --supports_request_format false
-          ubiops environment_revisions upload -e ${ENVIRONMENT_NAME} -a ./${DIR_PATH}/environment.tar
+          ubiops environment_revisions upload -e ${ENVIRONMENT_NAME} -a ./${DIR_PATH}/static-webserver-env.tar
       
       - name: Create and test a Deployment
         run: |
