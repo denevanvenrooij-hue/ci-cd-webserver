@@ -10,7 +10,7 @@ jobs:
     env:
       DEPLOYMENT_NAME: ci-cd-webserver
       ENVIRONMENT: python3-12
-      ENVIRONMENT_NAME: ci-cd-webservers
+      ENVIRONMENT_NAME: ci-cd-webserver
       DIR_PATH: ./docker-environment
       UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
       CONFIG_DIR: ./config
