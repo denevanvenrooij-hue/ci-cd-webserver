@@ -59,7 +59,7 @@ jobs:
 
       - name: Create and deploy an environment
         run: |
-          ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml --supports_request_format false
+          ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
           ubiops environment_revisions upload -e ${ENVIRONMENT_NAME} -a ${DIR_PATH}/static-webserver-env.tar
       
       - name: Create and test a Deployment
