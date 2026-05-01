@@ -7,6 +7,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       DEPLOYMENT_NAME: ci-cd-webserver
       ENVIRONMENT: python3-12
@@ -15,6 +17,7 @@ jobs:
       IMAGE_NAME: ci-cd-static-webserver
       CONFIG_DIR: ./config
       UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ← fixed, was secrets.UBIOPS_TOKEN
     steps:
       - uses: actions/checkout@v3
       
@@ -39,15 +42,9 @@ jobs:
         run: |
           mkdir -p ${DIR_PATH}
           docker build \
-            --build-arg GITHUB_REPO=${{ github.repository }} \
+            --build-arg GITHUB_REPO=https://github.com/${{ github.repository }} \
             -t ci-cd-webserver:${{ github.sha }} ./docker-files/
           docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/${IMAGE_NAME}.tar
-          echo "=== Docker images available ==="
-          docker images
-          echo "=== Contents of ${DIR_PATH} ==="
-          ls -lh ${DIR_PATH}/
-          echo "=== Verifying tar contents ==="
-          tar -tvf ${DIR_PATH}/static-webserver-env.tar | head -20
       
       - name: Authenticate with UbiOps
         run: ubiops signin --token -p "${{ secrets.UBIOPS_TOKEN }}" --api "https://api.intermax.ubiops.com/v2.1"
@@ -62,6 +59,7 @@ jobs:
         run: |
           ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
           ubiops environment_revisions upload -e ${ENVIRONMENT_NAME} -a ${DIR_PATH}/${IMAGE_NAME}.tar
+          ubiops environments wait ${ENVIRONMENT_NAME}
       
       - name: Create and test a Deployment
         run: |
