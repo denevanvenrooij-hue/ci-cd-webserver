@@ -12,8 +12,9 @@ jobs:
       ENVIRONMENT: python3-12
       ENVIRONMENT_NAME: ci-cd-webserver
       DIR_PATH: ./docker-environment
-      UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
+      IMAGE_NAME: ci-cd-static-webserver
       CONFIG_DIR: ./config
+      UBIOPS_TOKEN: ${{ secrets.UBIOPS_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       
@@ -40,7 +41,7 @@ jobs:
           docker build \
             --build-arg GITHUB_REPO=${{ github.repository }} \
             -t ci-cd-webserver:${{ github.sha }} ./docker-files/
-          docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/static-webserver-env.tar
+          docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/${IMAGE_NAME}.tar
           echo "=== Docker images available ==="
           docker images
           echo "=== Contents of ${DIR_PATH} ==="
@@ -60,7 +61,7 @@ jobs:
       - name: Create and deploy an environment
         run: |
           ubiops environments get ${ENVIRONMENT_NAME} || ubiops environments create -f ${CONFIG_DIR}/environment.yaml
-          ubiops environment_revisions upload -e ${ENVIRONMENT_NAME} -a ${DIR_PATH}/static-webserver-env.tar
+          ubiops environment_revisions upload -e ${ENVIRONMENT_NAME} -a ${DIR_PATH}/${IMAGE_NAME}.tar
       
       - name: Create and test a Deployment
         run: |
