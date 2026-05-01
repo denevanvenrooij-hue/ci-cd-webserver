@@ -41,6 +41,12 @@ jobs:
             --build-arg GITHUB_REPO=${{ github.repository }} \
             -t ci-cd-webserver:${{ github.sha }} ./docker-files/
           docker save ci-cd-webserver:${{ github.sha }} -o ${DIR_PATH}/static-webserver-env.tar
+          echo "=== Docker images available ==="
+          docker images
+          echo "=== Contents of ${DIR_PATH} ==="
+          ls -lh ${DIR_PATH}/
+          echo "=== Verifying tar contents ==="
+          tar -tvf ${DIR_PATH}/static-webserver-env.tar | head -20
       
       - name: Authenticate with UbiOps
         run: ubiops signin --token -p "${{ secrets.UBIOPS_TOKEN }}" --api "https://api.intermax.ubiops.com/v2.1"
