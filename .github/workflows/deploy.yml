@@ -66,7 +66,7 @@ jobs:
           ubiops deployments get ${DEPLOYMENT_NAME} || ubiops deployments create -f ${CONFIG_DIR}/deployment.yaml
           ubiops environment_variables create -d ${DEPLOYMENT_NAME} -f ${CONFIG_DIR}/environment_variables.yaml --overwrite
           ubiops deployments deploy -f ${CONFIG_DIR}/deployment_version.yaml -dir ${DIR_PATH} \
-            --version_name ${VERSION_NAME} --overwrite -y \
+            --version_name ${VERSION_NAME} --overwrite -y -e ${ENVIRONMENT_NAME} \
             --labels git-user:${{ github.actor }},git-commit:${GITHUB_SHA}
           chmod +x tests/test_deployment_health.sh
           ./tests/test_deployment_health.sh ${DEPLOYMENT_NAME} ${VERSION_NAME}
