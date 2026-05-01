@@ -2,9 +2,27 @@ FROM nginx:alpine
 
 RUN apk add --no-cache git
 
+# ── oauth2-proxy binary ──────────────────────────────────────────────────────
+ARG OAUTH2_PROXY_VERSION=v7.15.2
+RUN wget -q "https://github.com/oauth2-proxy/oauth2-proxy/releases/download/${OAUTH2_PROXY_VERSION}/oauth2-proxy-${OAUTH2_PROXY_VERSION}.linux-amd64.tar.gz" \
+         -O /tmp/oauth2-proxy.tar.gz \
+    && tar -xzf /tmp/oauth2-proxy.tar.gz -C /tmp \
+    && mv /tmp/oauth2-proxy-${OAUTH2_PROXY_VERSION}.linux-amd64/oauth2-proxy /usr/local/bin/oauth2-proxy \
+    && chmod +x /usr/local/bin/oauth2-proxy \
+    && rm -rf /tmp/oauth2-proxy*
+
+# Static oauth2-proxy config — secrets are supplied at runtime via env vars
+ENV OAUTH2_PROXY_PROVIDER=google \
+    OAUTH2_PROXY_EMAIL_DOMAINS=ubiops.com \
+    OAUTH2_PROXY_UPSTREAM=file:///dev/null \
+    OAUTH2_PROXY_HTTP_ADDRESS=127.0.0.1:4180 \
+    OAUTH2_PROXY_REVERSE_PROXY=true \
+    OAUTH2_PROXY_COOKIE_SECURE=false
+
+# ── site config ─────────────────────────────────────────────────────────────
 # Default repo URL baked in at build time — override at runtime via GITHUB_REPO env var
 ARG GITHUB_REPO
-ENV GITHUB_REPO="https://github/denevanvenrooij-hue/ci-cd-webserver.git/"
+ENV GITHUB_REPO=${GITHUB_REPO}
 
 ENV GITHUB_BRANCH="main"
 
@@ -26,6 +44,6 @@ RUN mkdir -p /var/cache/nginx/client_temp \
     chmod -R 777 /var/cache/nginx && \
     chmod -R 777 /var/run
 
-EXPOSE 4001
+EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]

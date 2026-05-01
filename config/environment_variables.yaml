@@ -14,6 +14,3 @@ environment_variables:
   - name: "OAUTH2_PROXY_REDIRECT_URL"
     value: "https://67b9fb7c-16ac-4f76-8c81-4f0c085a4dd6.services.16bc49ba.ubiops.io/oauth2/callback"
     secret: false
-
-
-    
